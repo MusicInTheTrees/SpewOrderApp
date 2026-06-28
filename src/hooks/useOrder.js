@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getOrderBySheet, saveOrderToSheet } from '../api/orders';
 import { useOfflineQueue } from './useOfflineQueue';
 
@@ -8,6 +8,8 @@ export function useOrder(sheetId) {
   const [syncPending, setSyncPending] = useState(false);
   const [fromCache, setFromCache] = useState(false);
   const { online, enqueue } = useOfflineQueue();
+  const pendingDataRef = useRef(null);
+  const saveTimerRef = useRef(null);
 
   useEffect(() => {
     if (!sheetId) return;
@@ -17,25 +19,32 @@ export function useOrder(sheetId) {
     }).catch(console.error);
   }, [sheetId]);
 
+  const doSave = useCallback((data) => {
+    setSaving(true);
+    return saveOrderToSheet(sheetId, data)
+      .then(() => setSyncPending(false))
+      .catch(() => {
+        setSyncPending(true);
+        enqueue(() => saveOrderToSheet(sheetId, data).then(() => setSyncPending(false)));
+      })
+      .finally(() => setSaving(false));
+  }, [sheetId, enqueue]);
+
   const setOrder = useCallback((updater) => {
     setOrderState(prev => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
-
-      const save = () => {
-        setSaving(true);
-        return saveOrderToSheet(sheetId, next)
-          .then(() => setSyncPending(false))
-          .catch(() => {
-            setSyncPending(true);
-            enqueue(() => saveOrderToSheet(sheetId, next).then(() => setSyncPending(false)));
-          })
-          .finally(() => setSaving(false));
-      };
-
-      save();
+      pendingDataRef.current = next;
       return next;
     });
-  }, [sheetId, enqueue]);
+
+    // Schedule debounced save outside the updater
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      if (pendingDataRef.current) {
+        doSave(pendingDataRef.current);
+      }
+    }, 500);
+  }, [doSave]);
 
   return { order, setOrder, saving, offline: !online, syncPending, fromCache };
 }

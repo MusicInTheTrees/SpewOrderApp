@@ -18,7 +18,7 @@ router.get('/', async (_req, res) => {
         if (!match) return null;
         const orderId = f.name;
         const cached = readOrderCache(orderId);
-        return { orderId, folderId: f.id, sheetId: cached ? cached.sheetId : null };
+        return { orderId, folderId: f.id, sheetId: cached ? cached.sheetId : null, state: cached ? cached.state : null, created: cached ? cached.created : null };
       })
       .filter(Boolean);
     res.json(orders);

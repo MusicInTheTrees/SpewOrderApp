@@ -25,6 +25,18 @@ export function useOfflineQueue() {
     }
   }, [online]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (queue.current.length > 0 && !flushing.current) {
+        flushing.current = true;
+        const items = [...queue.current];
+        queue.current = [];
+        Promise.all(items.map(fn => fn())).finally(() => { flushing.current = false; });
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
   const enqueue = useCallback((fn) => {
     queue.current.push(fn);
   }, []);

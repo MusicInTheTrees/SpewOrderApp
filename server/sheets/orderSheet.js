@@ -33,7 +33,7 @@ async function writeOrderToSheet(sheetId, orderData) {
       liRows.push([`${item.num}-inv`, '(from stock)', '', ...invSizes, '']);
     }
   }
-  await writeRange(sheetId, 'Line Items!A1', liRows);
+  await writeRange(sheetId, 'Line Items!A1', liRows, 'RAW');
 
   // Tab 3: Designs
   await clearRange(sheetId, 'Designs!A1:Z1000');
@@ -44,7 +44,7 @@ async function writeOrderToSheet(sheetId, orderData) {
       dRows.push([item.num, d.designNum, d.file, d.placement]);
     }
   }
-  await writeRange(sheetId, 'Designs!A1', dRows);
+  await writeRange(sheetId, 'Designs!A1', dRows, 'RAW');
 }
 
 async function readOrderFromSheet(sheetId) {

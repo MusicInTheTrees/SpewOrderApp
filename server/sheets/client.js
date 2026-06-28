@@ -11,12 +11,12 @@ async function readRange(spreadsheetId, range) {
   return res.data.values || [];
 }
 
-async function writeRange(spreadsheetId, range, values) {
+async function writeRange(spreadsheetId, range, values, inputOption = 'USER_ENTERED') {
   const sheets = getSheets();
   await sheets.spreadsheets.values.update({
     spreadsheetId,
     range,
-    valueInputOption: 'USER_ENTERED',
+    valueInputOption: inputOption,
     resource: { values },
   });
 }
