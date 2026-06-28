@@ -14,7 +14,7 @@ app.use('/designs-cache', express.static(config.DESIGNS_CACHE_DIR));
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
 // Routers mounted in later tasks (leave these commented out for now):
-// app.use('/auth', require('./auth/router'));
+app.use('/auth', require('./auth/router'));
 // app.use('/drive', require('./drive/router'));
 // app.use('/sheets', require('./sheets/router'));
 // app.use('/orders', require('./orders/router'));
