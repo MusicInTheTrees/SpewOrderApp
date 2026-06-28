@@ -15,8 +15,8 @@ export default function OrdersList() {
   async function handleNewOrder() {
     setLoading(true);
     try {
-      const { orderId } = await createOrder();
-      navigate(`/orders/${orderId}`);
+      const { orderId, sheetId } = await createOrder();
+      navigate(`/orders/${orderId}?sheetId=${sheetId}`);
     } catch (err) {
       console.error(err);
     } finally {
@@ -38,7 +38,7 @@ export default function OrdersList() {
       <div className="order-cards">
         {orders.length === 0 && <p>No orders yet. Create one to get started.</p>}
         {orders.map(o => (
-          <div key={o.orderId} className="order-card" onClick={() => navigate(`/orders/${o.orderId}`)}>
+          <div key={o.orderId} className="order-card" onClick={() => navigate(`/orders/${o.orderId}?sheetId=${o.sheetId}`)}>
             <strong>{o.orderId}</strong>
             <StateBadge state={o.state || 'building'} />
           </div>

@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingScreen from './components/LandingScreen';
 import OrdersList from './components/OrdersList';
+import OrderBuilder from './components/OrderBuilder';
 
 // Placeholders — replaced in later tasks
-function OrderBuilder() { return <div>Order Builder</div>; }
 function SettingsScreen() { return <div>Settings</div>; }
 
 export default function App() {
