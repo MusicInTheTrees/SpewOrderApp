@@ -1,0 +1,8 @@
+Top Level Folder for Operating: https://drive.google.com/drive/folders/1OYG9ThPfJI0x13080vqW6sIY3c9Us4wk?usp=drive_link
+Design Source Of Truth: https://drive.google.com/drive/folders/1CVhEtQZ5hgEB0vM83Y9WfjIo55-ouQ66?usp=drive_link
+Active Physical Inventory Sheet: https://docs.google.com/spreadsheets/d/16_es4t4yNLP4D1r1E1Yqju5EN4gBheUHzQTTmc3SK_c/edit?usp=sharing
+Active Blank Inventory Sheet: https://docs.google.com/spreadsheets/d/1a_vMRuJPn19Y7E1z-hfV17Z-gD_63PNKAn0Rwx2tkSk/edit?usp=sharing
+Top Level Order Folder (Create orders within here): https://drive.google.com/drive/folders/1voehD5oSz0zjy0k_8Q-RoQ76Imq62dLV?usp=drive_link
+
+----- Initial Design Reference Sheets -----
+Physical Inventory (includes the blank count in another tab): https://docs.google.com/spreadsheets/d/1ZcY5VT6RqzzqItComM8bBJJoL2j9WbPxbIbF7_v1hw8/edit?usp=sharing
