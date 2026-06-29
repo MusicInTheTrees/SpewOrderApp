@@ -48,8 +48,12 @@ export default function ItemsTab() {
 
   async function handleDelete() {
     if (!selectedItem) return;
-    await deleteItem(selectedItem.id);
-    setSelectedId(null);
+    try {
+      await deleteItem(selectedItem.id);
+      setSelectedId(null);
+    } catch (err) {
+      setToast(`Failed to delete item: ${err.message}`);
+    }
   }
 
   async function handlePush() {
