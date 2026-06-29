@@ -12,8 +12,12 @@ export default function ItemsTab() {
   const selectedItem = catalog.items.find(i => i.id === selectedId) || null;
 
   async function handleCreate() {
-    const item = await createItem();
-    setSelectedId(item.id);
+    try {
+      const item = await createItem();
+      setSelectedId(item.id);
+    } catch (err) {
+      setToast(`Failed to create item: ${err.message}`);
+    }
   }
 
   async function handleDelete() {

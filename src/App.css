@@ -1049,7 +1049,6 @@ textarea:focus {
 
 /* ===== Order Notes ===== */
 .order-notes {
-  width: 100%;
   min-height: 56px;
   padding: 10px 14px;
   font-size: 14px;
