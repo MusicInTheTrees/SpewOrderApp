@@ -1,6 +1,22 @@
 const { readRange, writeRange, clearRange, addSheet, getSheetNames } = require('./client');
 
-const SIZE_COLS = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+function formatSizes(sizes) {
+  return Object.entries(sizes || {})
+    .filter(([, v]) => (v?.total ?? 0) > 0)
+    .map(([label, v]) => `${label}×${v.total}`)
+    .join(', ');
+}
+
+function parseSizes(str) {
+  const sizes = {};
+  if (!str) return sizes;
+  for (const part of str.split(',')) {
+    const trimmed = part.trim();
+    const m = trimmed.match(/^(.+?)×(\d+)$/);
+    if (m) sizes[m[1]] = { total: parseInt(m[2], 10), inventory: 0 };
+  }
+  return sizes;
+}
 
 async function initOrderSheet(sheetId, orderData) {
   const existingNames = await getSheetNames(sheetId);
@@ -10,72 +26,98 @@ async function initOrderSheet(sheetId, orderData) {
 }
 
 async function writeOrderToSheet(sheetId, orderData) {
-  // Tab 1: Order Info
   await clearRange(sheetId, 'Sheet1!A1:B10');
   await writeRange(sheetId, 'Sheet1!A1:B7', [
-    ['Order ID',   orderData.orderId],
-    ['Order Name', orderData.orderName || ''],
-    ['State',      orderData.state],
-    ['Created',    orderData.created],
+    ['Order ID',     orderData.orderId],
+    ['Order Name',   orderData.orderName || ''],
+    ['State',        orderData.state],
+    ['Created',      orderData.created],
     ['Last Updated', new Date().toISOString().slice(0, 10)],
-    ['Notes',      orderData.notes || ''],
-    ['Sheet ID',   orderData.sheetId || ''],
+    ['Notes',        orderData.notes || ''],
+    ['Sheet ID',     orderData.sheetId || ''],
   ]);
 
-  // Tab 2: Line Items — columns: #, Apparel Type, Color, XS..XXL, Front Notes, Back Notes
   await clearRange(sheetId, 'Line Items!A1:Z1000');
-  const liHeader = ['#', 'Apparel Type', 'Color', ...SIZE_COLS, 'Front Notes', 'Back Notes'];
+  const liHeader = ['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes'];
   const liRows = [liHeader];
   for (const item of orderData.lineItems || []) {
-    const sizes    = SIZE_COLS.map(s => item.sizes?.[s]?.total     ?? 0);
-    const invSizes = SIZE_COLS.map(s => item.sizes?.[s]?.inventory ?? 0);
-    liRows.push([item.num, item.apparelType || '', item.color || '', ...sizes,
-      item.frontNotes || '', item.backNotes || '']);
-    if (invSizes.some(v => v > 0)) {
-      liRows.push([`${item.num}-inv`, '(from stock)', '', ...invSizes, '', '']);
+    const invSizes = Object.entries(item.sizes || {}).filter(([, v]) => (v?.inventory ?? 0) > 0);
+    liRows.push([
+      item.num,
+      item.itemTypeName || item.apparelType || '',
+      item.color || '',
+      formatSizes(item.sizes),
+      item.frontMethod || '',
+      item.frontNotes || '',
+      item.backMethod || '',
+      item.backNotes || '',
+    ]);
+    if (invSizes.length > 0) {
+      const invStr = invSizes.map(([label, v]) => `${label}×${v.inventory}`).join(', ');
+      liRows.push([`${item.num}-inv`, '(from stock)', '', invStr, '', '', '', '']);
     }
   }
   await writeRange(sheetId, 'Line Items!A1', liRows, 'RAW');
 
-  // Tab 3: Designs — columns: Line Item #, Design #, Design File, Placement
   await clearRange(sheetId, 'Designs!A1:Z1000');
   const dHeader = ['Line Item #', 'Design #', 'Design File', 'Placement'];
   const dRows = [dHeader];
   for (const item of orderData.lineItems || []) {
-    for (const d of item.frontDesigns || []) {
-      dRows.push([item.num, d.designNum, d.file, 'Front']);
-    }
-    for (const d of item.backDesigns || []) {
-      dRows.push([item.num, d.designNum, d.file, 'Back']);
-    }
+    for (const d of item.frontDesigns || []) dRows.push([item.num, d.designNum, d.file, 'Front']);
+    for (const d of item.backDesigns || []) dRows.push([item.num, d.designNum, d.file, 'Back']);
   }
   await writeRange(sheetId, 'Designs!A1', dRows, 'RAW');
+}
+
+function isNewFormat(headerRow) {
+  return Array.isArray(headerRow) && headerRow.includes('Sizes');
 }
 
 async function readOrderFromSheet(sheetId) {
   const info    = await readRange(sheetId, 'Sheet1!A1:B10');
   const infoMap = Object.fromEntries(info.map(([k, v]) => [k, v]));
 
-  const liRows = await readRange(sheetId, 'Line Items!A2:Z1000');
+  const allLiRows = await readRange(sheetId, 'Line Items!A1:Z1000');
+  const [headerRow, ...liRows] = allLiRows;
+  const newFmt = isNewFormat(headerRow);
+
   const lineItemsMap = {};
   for (const row of liRows) {
-    const [num, apparelType, color, ...rest] = row;
-    if (!num) continue;
+    if (!row[0]) continue;
+    const num = row[0];
     if (num.endsWith('-inv')) {
       const baseNum = num.replace('-inv', '');
-      if (lineItemsMap[baseNum]) {
-        SIZE_COLS.forEach((s, i) => {
-          lineItemsMap[baseNum].sizes[s] = lineItemsMap[baseNum].sizes[s] || { total: 0, inventory: 0 };
-          lineItemsMap[baseNum].sizes[s].inventory = parseInt(rest[i], 10) || 0;
-        });
+      if (lineItemsMap[baseNum] && newFmt) {
+        const invSizes = parseSizes(row[3]);
+        for (const [label, v] of Object.entries(invSizes)) {
+          if (lineItemsMap[baseNum].sizes[label]) {
+            lineItemsMap[baseNum].sizes[label].inventory = v.total;
+          }
+        }
       }
+      continue;
+    }
+    if (newFmt) {
+      const [num, itemTypeName, color, sizesStr, frontMethod, frontNotes, backMethod, backNotes] = row;
+      lineItemsMap[num] = {
+        num, itemTypeName, color,
+        sizes: parseSizes(sizesStr),
+        frontMethod: frontMethod || '', frontNotes: frontNotes || '',
+        backMethod: backMethod || '', backNotes: backNotes || '',
+        frontDesigns: [], backDesigns: [],
+      };
     } else {
+      // Legacy format: #, Apparel Type, Color, XS, S, M, L, XL, XXL, Front Notes, Back Notes
+      const OLD_SIZE_COLS = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+      const [num, apparelType, color, ...rest] = row;
       const sizes = {};
-      SIZE_COLS.forEach((s, i) => { sizes[s] = { total: parseInt(rest[i], 10) || 0, inventory: 0 }; });
-      const frontNotes = rest[SIZE_COLS.length]     || '';
-      const backNotes  = rest[SIZE_COLS.length + 1] || '';
-      lineItemsMap[num] = { num, apparelType, color, sizes, frontNotes, backNotes,
-        frontDesigns: [], backDesigns: [] };
+      OLD_SIZE_COLS.forEach((s, i) => { sizes[s] = { total: parseInt(rest[i], 10) || 0, inventory: 0 }; });
+      lineItemsMap[num] = {
+        num, apparelType, color, sizes,
+        frontMethod: '', frontNotes: rest[6] || '',
+        backMethod: '', backNotes: rest[7] || '',
+        frontDesigns: [], backDesigns: [],
+      };
     }
   }
 
@@ -88,13 +130,13 @@ async function readOrderFromSheet(sheetId) {
   }
 
   return {
-    orderId:     infoMap['Order ID']   || '',
-    orderName:   infoMap['Order Name'] || '',
-    state:       infoMap['State']      || 'building',
-    created:     infoMap['Created']    || '',
+    orderId:     infoMap['Order ID']     || '',
+    orderName:   infoMap['Order Name']   || '',
+    state:       infoMap['State']        || 'building',
+    created:     infoMap['Created']      || '',
     lastUpdated: infoMap['Last Updated'] || '',
-    notes:       infoMap['Notes']      || '',
-    sheetId:     infoMap['Sheet ID']   || sheetId,
+    notes:       infoMap['Notes']        || '',
+    sheetId:     infoMap['Sheet ID']     || sheetId,
     lineItems:   Object.values(lineItemsMap),
   };
 }

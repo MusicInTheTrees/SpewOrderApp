@@ -1,72 +1,76 @@
-const { readOrderFromSheet, writeOrderToSheet } = require('../sheets/orderSheet');
+const { writeOrderToSheet, readOrderFromSheet } = require('../sheets/orderSheet');
 
+// Mock the sheets client
 jest.mock('../sheets/client', () => ({
   readRange: jest.fn(),
   writeRange: jest.fn(),
   clearRange: jest.fn(),
   addSheet: jest.fn(),
-  getSheetNames: jest.fn(() => Promise.resolve(['Sheet1', 'Line Items', 'Designs'])),
+  getSheetNames: jest.fn().mockResolvedValue(['Sheet1', 'Line Items', 'Designs']),
 }));
 
-const { readRange, writeRange } = require('../sheets/client');
+const { readRange, writeRange, clearRange } = require('../sheets/client');
 
-const SAMPLE_ORDER = {
-  orderId: 'RMC-001-2026-06-28',
-  state: 'building',
-  created: '2026-06-28',
-  notes: '',
-  sheetId: 'sheet123',
-  lineItems: [
-    {
+test('writeOrderToSheet writes compact sizes and methods', async () => {
+  clearRange.mockResolvedValue();
+  writeRange.mockResolvedValue();
+
+  const order = {
+    orderId: 'RMC-001-2026-06-28',
+    orderName: 'Summer Drop',
+    state: 'building',
+    created: '2026-06-28',
+    notes: 'All DTG',
+    sheetId: 'sheet123',
+    lineItems: [{
       num: '01',
-      apparelType: "Women's Round Neck",
-      color: 'Black',
-      sizes: {
-        XS: { total: 0, inventory: 0 },
-        S: { total: 0, inventory: 0 },
-        M: { total: 2, inventory: 1 },
-        L: { total: 1, inventory: 0 },
-        XL: { total: 0, inventory: 0 },
-        XXL: { total: 0, inventory: 0 },
-      },
-      notes: 'Curved lettering lower back',
-      designs: [{ designNum: '1', file: 'bestie_bitches.png', placement: 'Front' }],
-    },
-  ],
-};
+      itemTypeId: 'abc',
+      itemTypeName: 'Unisex Tee',
+      color: 'White',
+      sizes: { M: { total: 5, inventory: 0 }, L: { total: 3, inventory: 1 } },
+      frontMethod: 'DTF',
+      frontNotes: 'chest center',
+      frontDesigns: [{ designNum: '1', file: 'logo.png' }],
+      backMethod: '',
+      backNotes: '',
+      backDesigns: [],
+    }],
+  };
 
-test('writeOrderToSheet calls writeRange for all 3 tabs', async () => {
-  await writeOrderToSheet('sheet123', SAMPLE_ORDER);
-  const calls = writeRange.mock.calls.map(c => c[1]);
-  expect(calls.some(r => r.includes('Sheet1'))).toBe(true);
-  expect(calls.some(r => r.includes('Line Items'))).toBe(true);
-  expect(calls.some(r => r.includes('Designs'))).toBe(true);
+  await writeOrderToSheet('sheet123', order);
+
+  // Find the Line Items writeRange call
+  const liCall = writeRange.mock.calls.find(c => c[1].startsWith('Line Items'));
+  const rows = liCall[2];
+  expect(rows[0]).toEqual(['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes']);
+  expect(rows[1][0]).toBe('01');
+  expect(rows[1][1]).toBe('Unisex Tee');
+  expect(rows[1][3]).toBe('M×5, L×3');
+  expect(rows[1][4]).toBe('DTF');
 });
 
-test('readOrderFromSheet parses info, line items, and designs', async () => {
-  readRange.mockImplementation((_id, range) => {
-    if (range.includes('Sheet1')) return Promise.resolve([
-      ['Order ID', 'RMC-001-2026-06-28'],
+test('readOrderFromSheet reads new format', async () => {
+  readRange.mockImplementation((sheetId, range) => {
+    if (range.startsWith('Sheet1')) return Promise.resolve([
+      ['Order ID', 'RMC-001'],
+      ['Order Name', 'Test'],
       ['State', 'building'],
       ['Created', '2026-06-28'],
       ['Last Updated', '2026-06-28'],
-      ['Notes', ''],
+      ['Notes', 'Global note'],
       ['Sheet ID', 'sheet123'],
     ]);
-    if (range.includes('Line Items')) return Promise.resolve([
-      ['01', "Women's Round Neck", 'Black', '0', '0', '2', '1', '0', '0', 'Curved lettering'],
-      ['01-inv', '(from stock)', '', '0', '0', '1', '0', '0', '0', ''],
+    if (range.startsWith('Line Items')) return Promise.resolve([
+      ['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes'],
+      ['01', 'Unisex Tee', 'White', 'M×5, L×3', 'DTF', 'chest', '', ''],
     ]);
-    if (range.includes('Designs')) return Promise.resolve([
-      ['01', '1', 'bestie_bitches.png', 'Front'],
-    ]);
+    if (range.startsWith('Designs')) return Promise.resolve([]);
     return Promise.resolve([]);
   });
 
   const order = await readOrderFromSheet('sheet123');
-  expect(order.orderId).toBe('RMC-001-2026-06-28');
-  expect(order.lineItems).toHaveLength(1);
-  expect(order.lineItems[0].sizes.M.total).toBe(2);
-  expect(order.lineItems[0].sizes.M.inventory).toBe(1);
-  expect(order.lineItems[0].designs[0].file).toBe('bestie_bitches.png');
+  expect(order.lineItems[0].itemTypeName).toBe('Unisex Tee');
+  expect(order.lineItems[0].sizes).toEqual({ M: { total: 5, inventory: 0 }, L: { total: 3, inventory: 0 } });
+  expect(order.lineItems[0].frontMethod).toBe('DTF');
+  expect(order.notes).toBe('Global note');
 });
