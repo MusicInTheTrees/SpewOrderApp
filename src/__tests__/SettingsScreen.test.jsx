@@ -57,3 +57,22 @@ test('clicking → on active color moves it to inactive', async () => {
     colors: expect.arrayContaining([expect.objectContaining({ name: 'White', active: false })]),
   })), { timeout: 1000 });
 });
+
+test('clicking → on active size moves it to inactive', async () => {
+  getItems.mockResolvedValue({
+    items: [{
+      id: 'item1', name: 'Tee', supplierUrl: '', colors: [],
+      sizes: [{ label: 'M', active: true, order: 0 }],
+      decorationMethods: [],
+    }],
+  });
+  putItem.mockResolvedValue({});
+  render(<MemoryRouter><SettingsScreen /></MemoryRouter>);
+  await userEvent.click(screen.getByRole('button', { name: 'Items' }));
+  await userEvent.click(await screen.findByText('Tee'));
+  const moveBtn = await screen.findByTitle('Move size to inactive');
+  await userEvent.click(moveBtn);
+  await waitFor(() => expect(putItem).toHaveBeenCalledWith('item1', expect.objectContaining({
+    sizes: expect.arrayContaining([expect.objectContaining({ label: 'M', active: false })]),
+  })), { timeout: 1000 });
+});
