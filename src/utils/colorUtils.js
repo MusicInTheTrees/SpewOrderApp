@@ -11,9 +11,9 @@ export function rgbToHex({ r, g, b }) {
 
 export function rgbToCmy({ r, g, b }) {
   return {
-    c: (1 - r / 255) * 100,
-    m: (1 - g / 255) * 100,
-    y: (1 - b / 255) * 100,
+    c: Math.round((1 - r / 255) * 100),
+    m: Math.round((1 - g / 255) * 100),
+    y: Math.round((1 - b / 255) * 100),
   };
 }
 

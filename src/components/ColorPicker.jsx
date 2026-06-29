@@ -63,9 +63,9 @@ export default function ColorPicker({ hex, onChange }) {
         <label>R <input type="number" min="0" max="255" value={rgb.r} onChange={e => applyRgb({ ...rgb, r: +e.target.value })} /></label>
         <label>G <input type="number" min="0" max="255" value={rgb.g} onChange={e => applyRgb({ ...rgb, g: +e.target.value })} /></label>
         <label>B <input type="number" min="0" max="255" value={rgb.b} onChange={e => applyRgb({ ...rgb, b: +e.target.value })} /></label>
-        <label>C <input type="number" min="0" max="100" value={Math.round(cmy.c)} onChange={e => applyCmy({ ...cmy, c: +e.target.value })} /></label>
-        <label>M <input type="number" min="0" max="100" value={Math.round(cmy.m)} onChange={e => applyCmy({ ...cmy, m: +e.target.value })} /></label>
-        <label>Y <input type="number" min="0" max="100" value={Math.round(cmy.y)} onChange={e => applyCmy({ ...cmy, y: +e.target.value })} /></label>
+        <label>C <input type="number" min="0" max="100" value={cmy.c} onChange={e => applyCmy({ ...cmy, c: +e.target.value })} /></label>
+        <label>M <input type="number" min="0" max="100" value={cmy.m} onChange={e => applyCmy({ ...cmy, m: +e.target.value })} /></label>
+        <label>Y <input type="number" min="0" max="100" value={cmy.y} onChange={e => applyCmy({ ...cmy, y: +e.target.value })} /></label>
         <button className="color-picker-clear" onClick={() => onChange(null)}>Clear swatch</button>
       </div>
     </div>

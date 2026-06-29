@@ -32,7 +32,15 @@ test('cmyToRgb round-trips', () => {
   const rgb = { r: 128, g: 64, b: 200 };
   const cmy = rgbToCmy(rgb);
   const back = cmyToRgb(cmy);
-  expect(back.r).toBeCloseTo(rgb.r, 0);
-  expect(back.g).toBeCloseTo(rgb.g, 0);
-  expect(back.b).toBeCloseTo(rgb.b, 0);
+  // Allow for rounding loss in the CMY->RGB conversion
+  expect(Math.abs(back.r - rgb.r)).toBeLessThanOrEqual(2);
+  expect(Math.abs(back.g - rgb.g)).toBeLessThanOrEqual(2);
+  expect(Math.abs(back.b - rgb.b)).toBeLessThanOrEqual(2);
+});
+
+test('rgbToCmy returns integers for arbitrary values', () => {
+  const cmy = rgbToCmy({ r: 128, g: 64, b: 200 });
+  expect(Number.isInteger(cmy.c)).toBe(true);
+  expect(Number.isInteger(cmy.m)).toBe(true);
+  expect(Number.isInteger(cmy.y)).toBe(true);
 });
