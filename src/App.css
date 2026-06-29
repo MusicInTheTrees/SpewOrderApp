@@ -1061,3 +1061,20 @@ textarea:focus {
   color: var(--text);
   background: white;
 }
+
+.legacy-item-note {
+  font-size: 13px;
+  color: var(--steel);
+  margin: 4px 0;
+}
+.items-empty-note {
+  font-size: 13px;
+  color: var(--steel);
+  font-style: italic;
+}
+.field-placeholder {
+  font-size: 13px;
+  color: var(--steel);
+  font-style: italic;
+  margin: 4px 0;
+}
