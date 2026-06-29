@@ -219,8 +219,8 @@ export default function ItemsTab() {
   return (
     <div className="items-tab">
       <div className="items-sync-bar">
-        <button className="btn-secondary" onClick={handlePush}>Push to Drive</button>
-        <button className="btn-secondary" onClick={() => setConfirmPull(true)}>Pull from Drive</button>
+        <button className="btn-secondary" onClick={handlePush}>⬆ Push to Drive</button>
+        <button className="btn-secondary items-pull-btn" onClick={() => setConfirmPull(true)}>⬇ Pull from Drive</button>
       </div>
 
       <div className="items-layout">
