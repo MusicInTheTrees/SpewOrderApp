@@ -4,6 +4,7 @@ const requireAuth = require('../middleware/requireAuth');
 const { readCatalog, writeCatalog } = require('./store');
 const config = require('../config');
 const { findFileByName, uploadFileContent, downloadFileContent } = require('../drive/client');
+const { scrapeColorsFromUrl } = require('./scrapeColors');
 const CATALOG_DRIVE_NAME = 'items-catalog.json';
 
 const router = express.Router();
@@ -65,7 +66,30 @@ router.delete('/:id', (req, res) => {
 });
 
 router.post('/:id/scrape-colors', async (req, res) => {
-  res.status(501).json({ error: 'Not implemented — see Task 3' });
+  const catalog = readCatalog();
+  const item = catalog.items.find(i => i.id === req.params.id);
+  if (!item) return res.status(404).json({ error: 'Item not found' });
+
+  let scraped;
+  try {
+    scraped = await scrapeColorsFromUrl(item.supplierUrl);
+  } catch (err) {
+    return res.json({ error: err.message });
+  }
+
+  if (!scraped.length) return res.json({ error: 'Could not parse colors from this URL', added: 0, skipped: 0 });
+
+  const existingNames = new Set(item.colors.map(c => c.name.toLowerCase()));
+  let added = 0;
+  let skipped = 0;
+  for (const sc of scraped) {
+    if (existingNames.has(sc.name.toLowerCase())) { skipped++; continue; }
+    item.colors.push({ name: sc.name, hex: sc.hex || null, active: false });
+    added++;
+  }
+
+  writeCatalog(catalog);
+  res.json({ added, skipped });
 });
 
 module.exports = router;

@@ -93,3 +93,25 @@ test('POST /items/pull returns error when no catalog on Drive', async () => {
   expect(res.status).toBe(200);
   expect(res.body.error).toMatch(/No catalog/i);
 });
+
+test('POST /items/:id/scrape-colors merges colors into inactive list', async () => {
+  // Mock https fetch by injecting a local scraper helper
+  jest.mock('../items/scrapeColors', () => ({
+    scrapeColorsFromUrl: jest.fn().mockResolvedValue([
+      { name: 'White', hex: '#ffffff' },
+      { name: 'Black', hex: '#000000' },
+    ]),
+  }));
+  const app = getApp();
+  const created = await request(app).post('/items').send({ name: 'Tee' });
+  const id = created.body.id;
+  const res = await request(app).post(`/items/${id}/scrape-colors`);
+  expect(res.status).toBe(200);
+  expect(res.body.added).toBe(2);
+  expect(res.body.skipped).toBe(0);
+  // Re-fetch item and verify colors are inactive
+  const catalog = await request(app).get('/items');
+  const item = catalog.body.items.find(i => i.id === id);
+  expect(item.colors).toHaveLength(2);
+  expect(item.colors[0].active).toBe(false);
+});
