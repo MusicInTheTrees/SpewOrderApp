@@ -1125,6 +1125,11 @@ textarea:focus {
   gap: 6px;
   width: 100%;
 }
+.order-notes-section .field-section-header {
+  width: 100%;
+  margin-left: 0;
+  background: var(--code-bg);
+}
 .order-notes {
   min-height: 56px;
   padding: 10px 14px;
