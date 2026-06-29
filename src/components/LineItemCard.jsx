@@ -15,8 +15,7 @@ export default function LineItemCard({ item, items = [], onChange, onRemove, onA
     onChange({ ...item, [field]: value });
   }
 
-  function selectItemType(e) {
-    const id = e.target.value;
+  function selectItemType(id) {
     const catalogItem = items.find(i => i.id === id);
     onChange({
       ...item,
@@ -48,14 +47,20 @@ export default function LineItemCard({ item, items = [], onChange, onRemove, onA
           <p className="legacy-item-note">
             <strong>{item.apparelType}</strong> — Select an item type from the catalog to continue editing.
           </p>
-        ) : (
-          <select value={item.itemTypeId || ''} onChange={selectItemType}>
-            <option value="">— select item type —</option>
-            {items.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
-          </select>
-        )}
-        {items.length === 0 && !isLegacy && (
+        ) : items.length === 0 ? (
           <p className="items-empty-note">No items configured — add items in Settings.</p>
+        ) : (
+          <div className="btn-group">
+            {items.map(i => (
+              <button
+                key={i.id}
+                className={item.itemTypeId === i.id ? 'active' : ''}
+                onClick={() => selectItemType(i.id)}
+              >
+                {i.name}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 

@@ -25,7 +25,7 @@ const BASE_ITEM = {
 test('selecting item type stores itemTypeId and itemTypeName', async () => {
   const onChange = vi.fn();
   render(<LineItemCard item={BASE_ITEM} items={CATALOG_ITEMS} onChange={onChange} onRemove={vi.fn()} onAddDesign={vi.fn()} />);
-  await userEvent.selectOptions(screen.getByRole('combobox'), 'item1');
+  await userEvent.click(screen.getByRole('button', { name: 'Unisex Tee' }));
   expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
     itemTypeId: 'item1',
     itemTypeName: 'Unisex Tee',

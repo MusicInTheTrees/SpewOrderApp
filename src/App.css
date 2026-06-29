@@ -742,13 +742,12 @@ textarea:focus {
 
 /* ===== Settings ===== */
 .settings-screen {
-  max-width: 540px;
   margin: 0 auto;
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  align-items: flex-start;
+  align-items: stretch;
   width: 100%;
   box-sizing: border-box;
 }
@@ -829,6 +828,7 @@ textarea:focus {
   gap: 4px;
   border-bottom: 2px solid var(--border);
   margin-bottom: 24px;
+  width: 100%;
 }
 .settings-tab {
   padding: 8px 20px;
