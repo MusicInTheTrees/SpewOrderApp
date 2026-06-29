@@ -1128,7 +1128,9 @@ textarea:focus {
 .order-notes-section .field-section-header {
   width: 100%;
   margin-left: 0;
-  background: var(--code-bg);
+  box-sizing: border-box;
+  background: var(--steel);
+  color: #fff;
 }
 .order-notes {
   min-height: 56px;
