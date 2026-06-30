@@ -29,6 +29,7 @@ export default function LandingScreen() {
 
   return (
     <div className="landing">
+      <img src="/RMCOrder_favicon.png" alt="RMC Ordering" className="landing-logo" />
       <h1>RMC Ordering</h1>
       {status.authenticated ? (
         <>
