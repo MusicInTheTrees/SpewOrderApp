@@ -161,7 +161,7 @@ set "_PS=%TEMP%\spew_shortcut.ps1"
     echo $s.WorkingDirectory = "%_WORK%"
     echo $s.WindowStyle = 1
     echo $s.Description = "Launch RMCOrder"
-    echo $s.IconLocation = "%SystemRoot%\System32\imageres.dll,14"
+    echo $s.IconLocation = "%_WORK%\public\RMCOrder.ico"
     echo $s.Save(^)
 ) > "%_PS%"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%_PS%" >nul 2>&1
