@@ -2,6 +2,7 @@ const express = require('express');
 const requireAuth = require('../middleware/requireAuth');
 const { readOrderFromSheet } = require('../sheets/orderSheet');
 const { readSettings } = require('../settings/store');
+const { readCatalog } = require('../items/store');
 const { buildEmailHtml, buildEmailPlainText } = require('./emailBuilder');
 const { createDraft } = require('./client');
 const { listFiles, findFileByName, findFolderByName, copyFile } = require('../drive/client');
@@ -18,6 +19,10 @@ router.post('/draft', async (req, res) => {
       readOrderFromSheet(sheetId),
       Promise.resolve(readSettings()),
     ]);
+    const catalog = readCatalog();
+    const catalogByName = Object.fromEntries(
+      catalog.items.map(i => [i.name.toLowerCase(), i])
+    );
     if (!settings.spewEmail) return res.status(400).json({ error: 'Spew email not configured in settings' });
 
     // Copy design files to order's Designs subfolder in Drive
@@ -54,8 +59,8 @@ router.post('/draft', async (req, res) => {
     const subject = orderData.orderName
       ? `RMC Order: ${orderData.orderName}`
       : `${orderData.orderId} — Order Request`;
-    const html = buildEmailHtml(orderData, settings);
-    const plain = buildEmailPlainText(orderData, settings);
+    const html = buildEmailHtml(orderData, settings, catalogByName);
+    const plain = buildEmailPlainText(orderData, settings, catalogByName);
     const draftId = await createDraft(settings.spewEmail, subject, html, plain);
     res.json({ draftId });
   } catch (err) {

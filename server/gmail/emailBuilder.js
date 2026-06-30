@@ -22,7 +22,7 @@ function groupByCategory(lineItems) {
   return groups;
 }
 
-function buildEmailHtml(orderData, _settings) {
+function buildEmailHtml(orderData, _settings, catalogByName = {}) {
   const groups = groupByCategory(orderData.lineItems || []);
   const title = orderData.orderName
     ? `RMC Order: ${orderData.orderName} (${orderData.orderId})`
@@ -35,7 +35,12 @@ function buildEmailHtml(orderData, _settings) {
   }
 
   for (const [category, items] of Object.entries(groups)) {
-    html += `<h3>${category}</h3><table border="1" cellpadding="6" cellspacing="0">`;
+    html += `<h3>${category}</h3>`;
+    const catalogItem = catalogByName[(category || '').toLowerCase()];
+    if (catalogItem?.publicNotes) {
+      html += `<p><em>${catalogItem.publicNotes}</em></p>`;
+    }
+    html += '<table border="1" cellpadding="6" cellspacing="0">';
     html += '<tr><th>#</th><th>Color</th><th>Sizes</th><th>Front Method</th><th>Front Designs</th><th>Front Notes</th><th>Back Method</th><th>Back Designs</th><th>Back Notes</th></tr>';
     for (const item of items) {
       const frontList = (item.frontDesigns || []).map(d => d.file).join('<br>') || '—';
@@ -59,7 +64,7 @@ function buildEmailHtml(orderData, _settings) {
   return html;
 }
 
-function buildEmailPlainText(orderData, _settings) {
+function buildEmailPlainText(orderData, _settings, catalogByName = {}) {
   const groups = groupByCategory(orderData.lineItems || []);
   const title = orderData.orderName
     ? `RMC Order: ${orderData.orderName} (${orderData.orderId})`
@@ -70,6 +75,8 @@ function buildEmailPlainText(orderData, _settings) {
 
   for (const [category, items] of Object.entries(groups)) {
     text += `${category}\n${'—'.repeat(category.length)}\n`;
+    const catalogItem = catalogByName[(category || '').toLowerCase()];
+    if (catalogItem?.publicNotes) text += `Note: ${catalogItem.publicNotes}\n`;
     for (const item of items) {
       text += `• #${item.num} | ${item.color || ''} | ${formatSizes(item.sizes)}\n`;
       const frontList = (item.frontDesigns || []).map(d => `  ${d.file}`).join('\n');

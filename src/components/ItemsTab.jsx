@@ -441,6 +441,24 @@ export default function ItemsTab() {
                   </div>
                 </div>
               </div>
+              <div className="field-group">
+                <label>Public Notes</label>
+                <textarea
+                  value={selectedItem.publicNotes || ''}
+                  onChange={e => updateField('publicNotes', e.target.value)}
+                  placeholder="Included in order emails for this item type..."
+                  rows={3}
+                />
+              </div>
+              <div className="field-group">
+                <label>Private Notes</label>
+                <textarea
+                  value={selectedItem.privateNotes || ''}
+                  onChange={e => updateField('privateNotes', e.target.value)}
+                  placeholder="Internal only — never shared..."
+                  rows={3}
+                />
+              </div>
               <button className="btn-danger" onClick={handleDelete}>Delete Item</button>
             </>
           )}
