@@ -475,6 +475,9 @@ textarea {
 textarea:focus {
   border-color: var(--accent);
 }
+.field-group textarea {
+  background: #fff;
+}
 
 /* ===== Size Buttons ===== */
 .size-buttons {
