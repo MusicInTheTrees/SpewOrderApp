@@ -19,13 +19,17 @@ function parseSizes(str) {
 }
 
 async function initOrderSheet(sheetId, orderData) {
-  const existingNames = await getSheetNames(sheetId);
-  if (!existingNames.includes('Line Items')) await addSheet(sheetId, 'Line Items');
-  if (!existingNames.includes('Designs')) await addSheet(sheetId, 'Designs');
   await writeOrderToSheet(sheetId, orderData);
 }
 
+async function ensureSheets(sheetId) {
+  const existingNames = await getSheetNames(sheetId);
+  if (!existingNames.includes('Line Items')) await addSheet(sheetId, 'Line Items');
+  if (!existingNames.includes('Designs')) await addSheet(sheetId, 'Designs');
+}
+
 async function writeOrderToSheet(sheetId, orderData) {
+  await ensureSheets(sheetId);
   await clearRange(sheetId, 'Sheet1!A1:B10');
   await writeRange(sheetId, 'Sheet1!A1:B7', [
     ['Order ID',     orderData.orderId],
