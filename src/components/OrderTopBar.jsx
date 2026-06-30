@@ -40,22 +40,32 @@ export default function OrderTopBar({ order, onAdvanceState, onGenerateDraft, sa
         </div>
       </div>
 
-      <StateBadge state={order?.state} />
-
-      {nextState && (
-        <button onClick={() => setConfirmState(true)}>
-          Mark as {nextState}
-        </button>
-      )}
-
       <button className="btn-primary" onClick={() => setConfirmDraft(true)}>
         Generate Email Draft
       </button>
 
       {saving && <span className="saving-indicator">Saving...</span>}
 
+      <div className="order-state-controls">
+        <div className="order-state-current">
+          <span className="order-state-label">Current State</span>
+          <StateBadge state={order?.state} />
+        </div>
+        {nextState && (
+          <>
+            <button className="move-to-btn" onClick={() => setConfirmState(true)}>
+              Move to →
+            </button>
+            <div className="order-state-next">
+              <span className="order-state-label">Next State</span>
+              <StateBadge state={nextState} dimmed />
+            </div>
+          </>
+        )}
+      </div>
+
       <ConfirmDialog
-        message={confirmState ? `Mark order as "${nextState}"?` : null}
+        message={confirmState ? `Move order to "${nextState}"?` : null}
         onConfirm={() => { setConfirmState(false); onAdvanceState(nextState); }}
         onCancel={() => setConfirmState(false)}
       />

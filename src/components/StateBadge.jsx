@@ -1,16 +1,19 @@
-const STATE_COLORS = {
-  building: '#6366f1',
-  sent: '#f59e0b',
-  pending: '#3b82f6',
-  paid: '#10b981',
-  fulfilled: '#8b5cf6',
-  received: '#22c55e',
+export const STATE_COLORS = {
+  building:  '#ef4444',
+  sent:      '#f97316',
+  pending:   '#eab308',
+  paid:      '#22c55e',
+  fulfilled: '#3b82f6',
+  received:  '#8b5cf6',
 };
 
-export default function StateBadge({ state }) {
+export default function StateBadge({ state, dimmed = false }) {
   const color = STATE_COLORS[state] || '#6b7280';
   return (
-    <span className="state-badge" style={{ backgroundColor: color }}>
+    <span
+      className="state-badge"
+      style={{ backgroundColor: color, opacity: dimmed ? 0.45 : 1 }}
+    >
       {state}
     </span>
   );

@@ -380,7 +380,37 @@ button:hover:not(:disabled) {
   font-size: 12px;
   color: var(--text);
   opacity: 0.5;
+}
+
+.order-state-controls {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-state-current,
+.order-state-next {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.order-state-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text);
+  opacity: 0.55;
+}
+
+.move-to-btn {
+  font-size: 13px;
+  padding: 6px 14px;
+  border-color: var(--border);
+  align-self: center;
 }
 
 .builder-body {
@@ -1195,6 +1225,29 @@ textarea:focus {
   box-sizing: border-box;
   color: var(--text);
   background: white;
+}
+
+/* ===== Email Preview ===== */
+.preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 24px 32px;
+  border-top: 1px solid var(--border);
+}
+
+.email-preview {
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  color: var(--text-h);
+  margin: 0;
 }
 
 .legacy-item-note {

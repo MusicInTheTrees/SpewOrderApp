@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listOrders, createOrder } from '../api/orders';
-import StateBadge from './StateBadge';
+import StateBadge, { STATE_COLORS } from './StateBadge';
 
 export default function OrdersList() {
   const [orders, setOrders] = useState([]);
@@ -42,7 +42,12 @@ export default function OrdersList() {
       <div className="order-cards">
         {orders.length === 0 && <p>No orders yet. Create one to get started.</p>}
         {orders.map(o => (
-          <div key={o.orderId} className="order-card" onClick={() => navigate(`/orders/${o.orderId}?sheetId=${o.sheetId}`)}>
+          <div
+            key={o.orderId}
+            className="order-card"
+            style={{ borderColor: STATE_COLORS[o.state || 'building'] }}
+            onClick={() => navigate(`/orders/${o.orderId}?sheetId=${o.sheetId}`)}
+          >
             <div className="order-card-info">
               <strong>{o.orderName || o.orderId}</strong>
               {o.orderName && <span className="order-card-id">{o.orderId}</span>}
