@@ -1,11 +1,13 @@
 const express = require('express');
 const requireAuth = require('../middleware/requireAuth');
 const { readOrderFromSheet } = require('../sheets/orderSheet');
+const { readOrderCache } = require('../orders/cache');
 const { readSettings } = require('../settings/store');
 const { readCatalog } = require('../items/store');
 const { buildEmailHtml, buildEmailPlainText } = require('./emailBuilder');
 const { upsertDraft } = require('./client');
 const { listFiles, findFileByName, findFolderByName, copyFile } = require('../drive/client');
+const { readRange } = require('../sheets/client');
 const config = require('../config');
 
 const router = express.Router();
@@ -15,10 +17,17 @@ router.post('/draft', async (req, res) => {
   const { sheetId, draftId: existingDraftId } = req.body;
   if (!sheetId) return res.status(400).json({ error: 'sheetId required' });
   try {
-    const [orderData, settings] = await Promise.all([
-      readOrderFromSheet(sheetId),
-      Promise.resolve(readSettings()),
-    ]);
+    // Read order — cache first so email reflects latest saved data
+    let orderData;
+    try {
+      const meta = await readRange(sheetId, 'Sheet1!A1:B10');
+      const infoMap = Object.fromEntries(meta.map(([k, v]) => [k, v]));
+      const orderId = infoMap['Order ID'] || '';
+      if (orderId) orderData = readOrderCache(orderId);
+    } catch { /* fall through */ }
+    if (!orderData) orderData = await readOrderFromSheet(sheetId);
+
+    const settings = readSettings();
     const catalog = readCatalog();
     const catalogByName = Object.fromEntries(
       catalog.items.map(i => [i.name.toLowerCase(), i])

@@ -81,7 +81,20 @@ function buildEmailHtml(orderData, _settings, catalogByName = {}) {
     html += '</table>';
   }
 
-  html += `<p>📁 Design files: see order folder in Google Drive (Order ID: ${orderData.orderId})</p>`;
+  const folderUrl = orderData.folderId
+    ? `https://drive.google.com/drive/folders/${orderData.folderId}`
+    : null;
+  const sheetUrl = orderData.sheetId
+    ? `https://docs.google.com/spreadsheets/d/${orderData.sheetId}`
+    : null;
+
+  html += '<p style="margin-top:16px">';
+  if (folderUrl) html += `<a href="${folderUrl}">📁 Order Folder (design files)</a>`;
+  if (folderUrl && sheetUrl) html += ' &nbsp;|&nbsp; ';
+  if (sheetUrl) html += `<a href="${sheetUrl}">📊 Order Sheet</a>`;
+  if (!folderUrl && !sheetUrl) html += `Design files: Order folder in Google Drive (${orderData.orderId})`;
+  html += '</p>';
+
   return html;
 }
 
@@ -121,7 +134,15 @@ function buildEmailPlainText(orderData, _settings, catalogByName = {}) {
     text += '\n';
   }
 
-  text += `Design files: Order folder in Google Drive (${orderData.orderId})\n`;
+  if (orderData.folderId) {
+    text += `Order folder (design files):\nhttps://drive.google.com/drive/folders/${orderData.folderId}\n`;
+  }
+  if (orderData.sheetId) {
+    text += `Order sheet:\nhttps://docs.google.com/spreadsheets/d/${orderData.sheetId}\n`;
+  }
+  if (!orderData.folderId && !orderData.sheetId) {
+    text += `Design files: Order folder in Google Drive (${orderData.orderId})\n`;
+  }
   return text;
 }
 
