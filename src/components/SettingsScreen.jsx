@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSettings, saveSettings } from '../api/settings';
+import { getSettings, saveSettings, updateApp } from '../api/settings';
 import { getAuthStatus, logout } from '../api/auth';
 import { useBugLog } from '../context/BugLogContext';
 import DesignPicker from './DesignPicker';
@@ -19,6 +19,8 @@ export default function SettingsScreen() {
   });
   const [email, setEmail] = useState(null);
   const [toast, setToast] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  const [updateLog, setUpdateLog] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +42,19 @@ export default function SettingsScreen() {
   async function handleLogout() {
     await logout();
     navigate('/');
+  }
+
+  async function handleUpdate() {
+    setUpdating(true);
+    setUpdateLog('Pulling latest from GitHub...\n');
+    try {
+      const result = await updateApp();
+      setUpdateLog(result.log + '\n\n✅ Update complete! Close and reopen the app to use the latest version.');
+    } catch (err) {
+      setUpdateLog((err.log ? err.log + '\n\n' : '') + '❌ Update failed: ' + err.message);
+    } finally {
+      setUpdating(false);
+    }
   }
 
   function set(field) {
@@ -96,6 +111,30 @@ export default function SettingsScreen() {
           <div className="account-section">
             <p>Connected as: {email || 'Unknown'}</p>
             <button className="btn-secondary" onClick={handleLogout}>Sign out</button>
+          </div>
+
+          <div className="settings-section-label">App Updates</div>
+          <div className="field-group">
+            <p style={{ margin: '0 0 8px', color: '#666', fontSize: '0.9em' }}>
+              Pulls the latest version from GitHub and installs any new packages.
+              After updating, close and reopen the app.
+            </p>
+            <button className="btn-secondary" onClick={handleUpdate} disabled={updating}>
+              {updating ? 'Updating...' : 'Update App'}
+            </button>
+            {updateLog && (
+              <pre style={{
+                marginTop: '10px',
+                padding: '10px',
+                background: '#1e1e1e',
+                color: '#d4d4d4',
+                fontSize: '0.8em',
+                borderRadius: '4px',
+                whiteSpace: 'pre-wrap',
+                maxHeight: '300px',
+                overflowY: 'auto',
+              }}>{updateLog}</pre>
+            )}
           </div>
         </>
       )}
