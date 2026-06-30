@@ -43,7 +43,7 @@ async function writeOrderToSheet(sheetId, orderData) {
   ]);
 
   await clearRange(sheetId, "'Line Items'!A1:Z1000");
-  const liHeader = ['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes'];
+  const liHeader = ['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes', 'Item Type ID'];
   const liRows = [liHeader];
   for (const item of orderData.lineItems || []) {
     const invSizes = Object.entries(item.sizes || {}).filter(([, v]) => (v?.inventory ?? 0) > 0);
@@ -56,6 +56,7 @@ async function writeOrderToSheet(sheetId, orderData) {
       item.frontNotes || '',
       item.backMethod || '',
       item.backNotes || '',
+      item.itemTypeId || '',
     ]);
     if (invSizes.length > 0) {
       const invStr = invSizes.map(([label, v]) => `${label}×${v.inventory}`).join(', ');
@@ -110,9 +111,10 @@ async function readOrderFromSheet(sheetId) {
       continue;
     }
     if (newFmt) {
-      const [, itemTypeName, color, sizesStr, frontMethod, frontNotes, backMethod, backNotes] = row;
+      const [, itemTypeName, color, sizesStr, frontMethod, frontNotes, backMethod, backNotes, itemTypeId] = row;
       lineItemsMap[num] = {
-        num, itemTypeName, color,
+        num, itemTypeName, itemTypeId: itemTypeId || '',
+        color,
         sizes: parseSizes(sizesStr),
         frontMethod: frontMethod || '', frontNotes: frontNotes || '',
         backMethod: backMethod || '', backNotes: backNotes || '',
