@@ -42,11 +42,12 @@ test('writeOrderToSheet writes compact sizes and methods', async () => {
   // Find the Line Items writeRange call
   const liCall = writeRange.mock.calls.find(c => c[1].includes('Line Items'));
   const rows = liCall[2];
-  expect(rows[0]).toEqual(['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes']);
+  expect(rows[0]).toEqual(['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes', 'Item Type ID']);
   expect(rows[1][0]).toBe('01');
   expect(rows[1][1]).toBe('Unisex Tee');
   expect(rows[1][3]).toBe('M×5, L×3');
   expect(rows[1][4]).toBe('DTF');
+  expect(rows[1][8]).toBe('abc'); // itemTypeId in column I
 });
 
 test('readOrderFromSheet reads new format', async () => {
@@ -61,8 +62,8 @@ test('readOrderFromSheet reads new format', async () => {
       ['Sheet ID', 'sheet123'],
     ]);
     if (range.includes('Line Items')) return Promise.resolve([
-      ['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes'],
-      ['01', 'Unisex Tee', 'White', 'M×5, L×3', 'DTF', 'chest', '', ''],
+      ['#', 'Item Type', 'Color', 'Sizes', 'Front Method', 'Front Notes', 'Back Method', 'Back Notes', 'Item Type ID'],
+      ['01', 'Unisex Tee', 'White', 'M×5, L×3', 'DTF', 'chest', '', '', 'type-abc'],
     ]);
     if (range.startsWith('Designs')) return Promise.resolve([]);
     return Promise.resolve([]);
@@ -70,6 +71,7 @@ test('readOrderFromSheet reads new format', async () => {
 
   const order = await readOrderFromSheet('sheet123');
   expect(order.lineItems[0].itemTypeName).toBe('Unisex Tee');
+  expect(order.lineItems[0].itemTypeId).toBe('type-abc');
   expect(order.lineItems[0].sizes).toEqual({ M: { total: 5, inventory: 0 }, L: { total: 3, inventory: 0 } });
   expect(order.lineItems[0].frontMethod).toBe('DTF');
   expect(order.notes).toBe('Global note');
