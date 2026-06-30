@@ -1,4 +1,4 @@
-# SpewOrderApp Phase 1 Implementation Plan
+# RMCOrder Phase 1 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -26,7 +26,7 @@
 ## File Structure
 
 ```
-SpewOrderApp/
+RMCOrder/
   server/
     package.json
     index.js                        # Express app entry, mounts all routers
@@ -605,7 +605,7 @@ export default function LandingScreen() {
 
   return (
     <div className="landing">
-      <h1>SpewOrderApp</h1>
+      <h1>RMCOrder</h1>
       {status.authenticated ? (
         <>
           <button className="btn-primary" onClick={handleContinue}>
@@ -1617,7 +1617,7 @@ export default function OrdersList() {
   return (
     <div className="orders-list">
       <header>
-        <h1>SpewOrderApp</h1>
+        <h1>RMCOrder</h1>
         <div>
           <button onClick={() => navigate('/settings')}>⚙ Settings</button>
           <button className="btn-primary" onClick={handleNewOrder} disabled={loading}>
@@ -2859,12 +2859,12 @@ git commit -m "feat: copy design files to order Drive folder on draft generation
 
 ```bat
 @echo off
-title SpewOrderApp
+title RMCOrder
 
-echo Starting SpewOrderApp...
+echo Starting RMCOrder...
 
 :: Start backend
-start "SpewOrderApp Backend" /min cmd /c "cd server && npm start"
+start "RMCOrder Backend" /min cmd /c "cd server && npm start"
 
 :: Wait for backend to be ready (poll /health)
 :wait_backend
@@ -2874,7 +2874,7 @@ if errorlevel 1 goto wait_backend
 echo Backend ready.
 
 :: Start frontend in background
-start "SpewOrderApp Frontend" /min cmd /c "npm run dev"
+start "RMCOrder Frontend" /min cmd /c "npm run dev"
 
 :: Wait for frontend to be ready
 :wait_frontend
@@ -2886,7 +2886,7 @@ echo Frontend ready.
 :: Open browser
 start http://localhost:5175
 
-echo SpewOrderApp is running. Close this window to stop both servers.
+echo RMCOrder is running. Close this window to stop both servers.
 pause
 ```
 

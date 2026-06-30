@@ -3,11 +3,11 @@ const fs = require('fs');
 const os = require('os');
 
 // Credentials live OUTSIDE the repo so git never touches them and they're easy to transfer.
-// Location: %APPDATA%\SpewOrderApp\speworderapp-credentials.env
+// Location: %APPDATA%\RMCOrder\rmcorder-credentials.env
 const _externalCreds = path.join(
   process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming'),
-  'SpewOrderApp',
-  'speworderapp-credentials.env'
+  'RMCOrder',
+  'rmcorder-credentials.env'
 );
 require('dotenv').config({
   path: fs.existsSync(_externalCreds) ? _externalCreds : path.join(__dirname, '.env'),

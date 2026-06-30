@@ -1,4 +1,4 @@
-# SpewOrderApp — Phase 1 Design: Order Builder + Google Drive Integration
+# RMCOrder — Phase 1 Design: Order Builder + Google Drive Integration
 
 **Date:** 2026-06-28  
 **Scope:** Phase 1 of 3  
@@ -9,7 +9,7 @@
 
 ## Overview
 
-SpewOrderApp is a locally-hosted React + Node web app that helps Rocky Meowtain Company build, manage, and submit apparel print orders to Spew. It replaces hand-rolled text orders with a structured, visual order builder backed by Google Drive and Google Sheets.
+RMCOrder is a locally-hosted React + Node web app that helps Rocky Meowtain Company build, manage, and submit apparel print orders to Spew. It replaces hand-rolled text orders with a structured, visual order builder backed by Google Drive and Google Sheets.
 
 Phase 1 covers: order creation and editing, Google Drive folder/file management, Google Sheets as live order source of truth, local caching (designs + order data), and Gmail draft generation.
 

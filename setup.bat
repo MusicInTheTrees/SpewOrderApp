@@ -1,11 +1,11 @@
 @echo off
 setlocal enabledelayedexpansion
 cls
-title SpewOrderApp - Setup
+title RMCOrder - Setup
 
 echo.
 echo  ================================================================
-echo    SpewOrderApp  -  First-Time Setup
+echo    RMCOrder  -  First-Time Setup
 echo  ================================================================
 echo.
 echo  Your computer needs an internet connection.
@@ -87,8 +87,8 @@ REM  STEP 4 / 4   Google credentials
 REM ================================================================
 call :progress 4 "Configuring Google credentials"
 
-set "_CREDS_DIR=%APPDATA%\SpewOrderApp"
-set "_CREDS=%APPDATA%\SpewOrderApp\speworderapp-credentials.env"
+set "_CREDS_DIR=%APPDATA%\RMCOrder"
+set "_CREDS=%APPDATA%\RMCOrder\rmcorder-credentials.env"
 
 if not exist "%_CREDS_DIR%" mkdir "%_CREDS_DIR%"
 
@@ -104,7 +104,7 @@ if !ERRORLEVEL! EQU 0 (
     echo    GOOGLE CREDENTIALS NEEDED  (one-time setup)
     echo  ----------------------------------------------------------------
     echo.
-    echo   SpewOrderApp needs Google Sheets, Drive, and Gmail access.
+    echo   RMCOrder needs Google Sheets, Drive, and Gmail access.
     echo.
     echo   STEPS:
     echo    1. A browser window will open to Google Cloud Console.
@@ -156,18 +156,18 @@ if "!_WORK:~-1!"=="\" set "_WORK=!_WORK:~0,-1!"
 set "_PS=%TEMP%\spew_shortcut.ps1"
 (
     echo $ws = New-Object -ComObject WScript.Shell
-    echo $s = $ws.CreateShortcut("$env:USERPROFILE\Desktop\SpewOrderApp.lnk"^)
+    echo $s = $ws.CreateShortcut("$env:USERPROFILE\Desktop\RMCOrder.lnk"^)
     echo $s.TargetPath = "%_TARGET%"
     echo $s.WorkingDirectory = "%_WORK%"
     echo $s.WindowStyle = 1
-    echo $s.Description = "Launch SpewOrderApp"
+    echo $s.Description = "Launch RMCOrder"
     echo $s.IconLocation = "%SystemRoot%\System32\imageres.dll,14"
     echo $s.Save(^)
 ) > "%_PS%"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%_PS%" >nul 2>&1
 del "%_PS%" >nul 2>&1
 
-echo   Done. "SpewOrderApp" shortcut is on your Desktop.
+echo   Done. "RMCOrder" shortcut is on your Desktop.
 
 REM ================================================================
 REM  Launch

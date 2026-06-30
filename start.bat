@@ -1,10 +1,10 @@
 @echo off
-title SpewOrderApp
+title RMCOrder
 
-echo  Starting SpewOrderApp...
+echo  Starting RMCOrder...
 
-start "SpewOrderApp-Backend"  /d "%~dp0server" /min cmd /k "node index.js"
-start "SpewOrderApp-Frontend" /d "%~dp0"       /min cmd /k "npm run dev"
+start "RMCOrder-Backend"  /d "%~dp0server" /min cmd /k "node index.js"
+start "RMCOrder-Frontend" /d "%~dp0"       /min cmd /k "npm run dev"
 
 :wait_backend
 timeout /t 1 /nobreak >nul
@@ -22,6 +22,6 @@ echo  App is running at http://localhost:5175
 echo  Press any key to stop both servers.
 pause >nul
 
-taskkill /FI "WINDOWTITLE eq SpewOrderApp-Backend*"  /T /F >nul 2>&1
-taskkill /FI "WINDOWTITLE eq SpewOrderApp-Frontend*" /T /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq RMCOrder-Backend*"  /T /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq RMCOrder-Frontend*" /T /F >nul 2>&1
 echo  Stopped.
