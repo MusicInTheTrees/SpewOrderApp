@@ -1,4 +1,4 @@
 import { apiFetch } from './client';
 
-export const createDraft = (sheetId) =>
-  apiFetch('/gmail/draft', { method: 'POST', body: { sheetId } });
+export const upsertDraft = (sheetId, draftId = null) =>
+  apiFetch('/gmail/draft', { method: 'POST', body: { sheetId, draftId } });

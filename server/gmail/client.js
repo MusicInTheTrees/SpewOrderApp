@@ -1,12 +1,9 @@
 const { google } = require('googleapis');
 const { getOAuth2Client } = require('../auth/oauth');
 
-async function createDraft(to, subject, htmlBody, plainTextBody) {
-  const auth = getOAuth2Client();
-  const gmail = google.gmail({ version: 'v1', auth });
-
+function buildRaw(to, subject, htmlBody, plainTextBody) {
   const boundary = 'boundary_speworderapp';
-  const rawEmail = [
+  const raw = [
     `To: ${to}`,
     `Subject: ${subject}`,
     'MIME-Version: 1.0',
@@ -24,8 +21,27 @@ async function createDraft(to, subject, htmlBody, plainTextBody) {
     '',
     `--${boundary}--`,
   ].join('\r\n');
+  return Buffer.from(raw).toString('base64url');
+}
 
-  const encoded = Buffer.from(rawEmail).toString('base64url');
+async function upsertDraft(to, subject, htmlBody, plainTextBody, existingDraftId = null) {
+  const auth = getOAuth2Client();
+  const gmail = google.gmail({ version: 'v1', auth });
+  const encoded = buildRaw(to, subject, htmlBody, plainTextBody);
+
+  if (existingDraftId) {
+    try {
+      const res = await gmail.users.drafts.update({
+        userId: 'me',
+        id: existingDraftId,
+        resource: { message: { raw: encoded } },
+      });
+      return res.data.id;
+    } catch {
+      // Draft was sent or deleted — fall through to create a new one
+    }
+  }
+
   const res = await gmail.users.drafts.create({
     userId: 'me',
     resource: { message: { raw: encoded } },
@@ -33,4 +49,4 @@ async function createDraft(to, subject, htmlBody, plainTextBody) {
   return res.data.id;
 }
 
-module.exports = { createDraft };
+module.exports = { upsertDraft };

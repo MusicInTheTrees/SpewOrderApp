@@ -31,7 +31,7 @@ async function ensureSheets(sheetId) {
 async function writeOrderToSheet(sheetId, orderData) {
   await ensureSheets(sheetId);
   await clearRange(sheetId, 'Sheet1!A1:B10');
-  await writeRange(sheetId, 'Sheet1!A1:B7', [
+  await writeRange(sheetId, 'Sheet1!A1:B8', [
     ['Order ID',     orderData.orderId],
     ['Order Name',   orderData.orderName || ''],
     ['State',        orderData.state],
@@ -39,6 +39,7 @@ async function writeOrderToSheet(sheetId, orderData) {
     ['Last Updated', new Date().toISOString().slice(0, 10)],
     ['Notes',        orderData.notes || ''],
     ['Sheet ID',     orderData.sheetId || ''],
+    ['Draft ID',     orderData.draftId || ''],
   ]);
 
   await clearRange(sheetId, "'Line Items'!A1:Z1000");
@@ -147,6 +148,7 @@ async function readOrderFromSheet(sheetId) {
     lastUpdated: infoMap['Last Updated'] || '',
     notes:       infoMap['Notes']        || '',
     sheetId:     infoMap['Sheet ID']     || sheetId,
+    draftId:     infoMap['Draft ID']     || '',
     lineItems:   Object.values(lineItemsMap),
   };
 }

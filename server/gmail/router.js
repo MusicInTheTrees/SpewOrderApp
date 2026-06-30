@@ -4,7 +4,7 @@ const { readOrderFromSheet } = require('../sheets/orderSheet');
 const { readSettings } = require('../settings/store');
 const { readCatalog } = require('../items/store');
 const { buildEmailHtml, buildEmailPlainText } = require('./emailBuilder');
-const { createDraft } = require('./client');
+const { upsertDraft } = require('./client');
 const { listFiles, findFileByName, findFolderByName, copyFile } = require('../drive/client');
 const config = require('../config');
 
@@ -12,7 +12,7 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.post('/draft', async (req, res) => {
-  const { sheetId } = req.body;
+  const { sheetId, draftId: existingDraftId } = req.body;
   if (!sheetId) return res.status(400).json({ error: 'sheetId required' });
   try {
     const [orderData, settings] = await Promise.all([
@@ -61,7 +61,7 @@ router.post('/draft', async (req, res) => {
       : `${orderData.orderId} — Order Request`;
     const html = buildEmailHtml(orderData, settings, catalogByName);
     const plain = buildEmailPlainText(orderData, settings, catalogByName);
-    const draftId = await createDraft(settings.spewEmail, subject, html, plain);
+    const draftId = await upsertDraft(settings.spewEmail, subject, html, plain, existingDraftId || null);
     res.json({ draftId });
   } catch (err) {
     const msg = err.message || '';

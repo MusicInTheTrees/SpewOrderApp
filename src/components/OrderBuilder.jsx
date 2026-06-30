@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useOrder } from '../hooks/useOrder';
 import { useItems } from '../hooks/useItems';
-import { createDraft } from '../api/gmail';
+import { upsertDraft } from '../api/gmail';
 import { getSettings } from '../api/settings';
 import { decrementInventory, incrementInventory } from '../api/inventory';
 import { useBugLog } from '../context/BugLogContext';
@@ -103,8 +103,10 @@ export default function OrderBuilder() {
 
   async function handleGenerateDraft() {
     try {
-      await createDraft(sheetId);
-      setToast('Gmail draft created successfully!');
+      const { draftId } = await upsertDraft(sheetId, order.draftId || null);
+      const isUpdate = !!(order.draftId && draftId === order.draftId);
+      setOrder(prev => ({ ...prev, draftId }));
+      setToast(isUpdate ? 'Gmail draft updated!' : 'Gmail draft created!');
     } catch (err) {
       const msg = `Failed to create draft: ${err.message}`;
       setToast(msg);
