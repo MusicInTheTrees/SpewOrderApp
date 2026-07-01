@@ -1,8 +1,8 @@
 const express = require('express');
 const requireAuth = require('../middleware/requireAuth');
-const { listFiles, createFolder, createSpreadsheet } = require('../drive/client');
+const { listFiles, createFolder, createSpreadsheet, findFileByName, trashFile } = require('../drive/client');
 const { generateOrderId } = require('./idGenerator');
-const { writeOrderCache, readOrderCache } = require('./cache');
+const { writeOrderCache, readOrderCache, deleteOrderCache } = require('./cache');
 const { initOrderSheet } = require('../sheets/orderSheet');
 const config = require('../config');
 
@@ -52,6 +52,19 @@ router.post('/', async (_req, res) => {
     await initOrderSheet(sheetId, orderData);
 
     res.json({ orderId, sheetId, folderId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/:orderId', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    // Trash the Drive folder (contains the Sheet + Designs) — recoverable from Drive trash.
+    const folder = await findFileByName(orderId, config.DRIVE.ORDER_FOLDER);
+    if (folder) await trashFile(folder.id);
+    deleteOrderCache(orderId);
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

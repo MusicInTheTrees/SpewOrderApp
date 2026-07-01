@@ -186,6 +186,24 @@ button:hover:not(:disabled) {
   opacity: 0.6;
 }
 
+.order-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 6px;
+  margin-left: 8px;
+  border-radius: 6px;
+  opacity: 0.45;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.order-delete-btn:hover {
+  opacity: 1;
+  background: rgba(220, 38, 38, 0.1);
+}
+
 /* ===== Error Banner ===== */
 .error-banner {
   background: rgba(220, 38, 38, 0.07);
@@ -909,6 +927,18 @@ textarea:focus {
   min-height: 200px;
   font-size: 15px;
   opacity: 0.6;
+}
+
+.load-error {
+  flex-direction: column;
+  gap: 12px;
+  opacity: 1;
+  text-align: center;
+}
+
+.load-error-actions {
+  display: flex;
+  gap: 10px;
 }
 
 /* ===== Settings Tabs ===== */

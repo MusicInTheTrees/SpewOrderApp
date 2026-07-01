@@ -6,7 +6,7 @@ const { readSettings } = require('../settings/store');
 const { readCatalog } = require('../items/store');
 const { buildEmailHtml, buildEmailPlainText } = require('./emailBuilder');
 const { upsertDraft } = require('./client');
-const { listFiles, findFileByName, findFolderByName, copyFile } = require('../drive/client');
+const { listFiles, findFileByName, findFolderByName, copyFile, shareFileWithUser } = require('../drive/client');
 const { readRange } = require('../sheets/client');
 const config = require('../config');
 
@@ -37,6 +37,12 @@ router.post('/draft', async (req, res) => {
     // Copy design files to order's Designs subfolder in Drive
     const orderFolder = await findFileByName(orderData.orderId, config.DRIVE.ORDER_FOLDER);
     if (orderFolder) {
+      // Give the recipient view access to the order folder so the emailed link works.
+      // Cascades to the Sheet + Designs inside. Non-fatal if it fails (e.g. already shared).
+      await shareFileWithUser(orderFolder.id, settings.spewEmail, 'reader').catch(err =>
+        console.warn(`Could not share order folder with ${settings.spewEmail}:`, err.message)
+      );
+
       const designsFolder = await findFolderByName('Designs', orderFolder.id);
       if (designsFolder) {
         const sourceFiles = await listFiles(config.DRIVE.DESIGN_SOURCE);

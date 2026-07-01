@@ -23,7 +23,7 @@ export default function OrderBuilder() {
   const [searchParams] = useSearchParams();
   const sheetId = searchParams.get('sheetId');
   const navigate = useNavigate();
-  const { order, setOrder, saving, offline, syncPending, saveNow } = useOrder(sheetId, {
+  const { order, setOrder, saving, offline, syncPending, saveNow, loadError, reload } = useOrder(sheetId, {
     onError: (msg) => {
       const err = `Save failed: ${msg}`;
       setToast(err);
@@ -42,6 +42,20 @@ export default function OrderBuilder() {
   useEffect(() => {
     getSettings().then(s => { settingsRef.current = s; }).catch(() => {});
   }, []);
+
+  if (loadError) {
+    const isAuth = /auth|401|invalid_grant|credential|token/i.test(loadError);
+    return (
+      <div className="loading load-error">
+        <p>Couldn't load this order: {loadError}</p>
+        {isAuth && <p>Your Google session may have expired — try signing in again.</p>}
+        <div className="load-error-actions">
+          <button className="btn-primary" onClick={reload}>Retry</button>
+          <button className="btn-secondary" onClick={() => navigate('/orders')}>← Back to Orders</button>
+        </div>
+      </div>
+    );
+  }
 
   if (!order) return <div className="loading">Loading order...</div>;
 
